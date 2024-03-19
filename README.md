@@ -55,3 +55,10 @@ let http_request: Vec<_> = buf_reader
 println!("Request: {:#?}", http_request);
 ```
 - Finally, the function prints the collected HTTP request data to the console.
+
+### Commit 2 Reflection Notes
+
+![Commit 2 screen capture](/assets/images/commit2.png)
+
+
+In this commit, there are several additions to the `handle_connection` function. The function is now not only capable of reading requests through a TCP stream but also able to respond to them. Its functionality is expanded by sending an HTTP response to the client containing the content of `hello.html`. This process is achieved by creating a response status line indicating that the request has been successfully processed with the code "200 OK". Then, the content of the `hello.html` file is read, and its length is calculated to be included in the response header. The complete HTTP response, including the status line, headers, and content, is then constructed and sent back to the client through the same stream. This illustrates how a basic web server can respond to HTTP requests by sending web page content to the client that sent the request.
