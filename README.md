@@ -125,3 +125,9 @@ In the updated `handle_connection` function, there are slight changes where the 
 In this endpoint, `thread::sleep(Duration::from_secs(10));` is executed to delay processing for 10 seconds. However, when there are multiple users, this can be highly disruptive because several seconds can be crucial. In the simulated slow response scenario, when a user opens two browser windows and tries to access `127.0.0.1/sleep` and `127.0.0.1` in the other window, the user must wait for requests to be processed sequentially due to the single-threaded nature.
 
 When a request to `/sleep` is processed, it illustrates how a website that needs to respond within a few seconds can cause delays when responding to other requests. Thus, the use of a single thread can consume time by potentially blocking the processing of other requests on the server.
+
+### Commit 5 Reflection Notes
+
+To implement an efficient system using multithreading, we need to build a `ThreadPool` that allows us to handle various requests simultaneously. The next step involves creating `Workers`, which are responsible for receiving and executing specific tasks or jobs sent to each request. To ensure smooth communication between the `ThreadPool` and each `Worker`, we need to set up a message passing mechanism, where the `ThreadPool` has the ability to send signals via a sender to cloned receivers assigned to each Worker. This ensures that when the `ThreadPool` receives a request to execute a task, a signal will be sent via the sender to the relevant `Worker`'s receiver, which then processes the job.
+
+Within each `Worker`, there is one thread consistently waiting for incoming data. As soon as the data is received, the `Worker` will lock the receiver to process that data. Once the process is completed, the lock on the receiver will be released, allowing another `Worker` to receive information and execute the next task.
