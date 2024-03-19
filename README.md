@@ -117,3 +117,11 @@ Refactoring in this manner enhances the efficiency, readability, and maintainabi
 
 - Screenshot of Proof
 ![Commit 3 screen capture](/assets/images/commit3failed.png)
+
+### Commit 4 Reflection Notes
+
+In the updated `handle_connection` function, there are slight changes where the if-else part is replaced with a `match` statement. The `match` statement is used to match the value of `request_line` with several predefined patterns: `/`, `/sleep`, and others. The introduction of a new endpoint, `/sleep`, demonstrates how a single-threaded server can handle requests that require longer processing times.
+
+In this endpoint, `thread::sleep(Duration::from_secs(10));` is executed to delay processing for 10 seconds. However, when there are multiple users, this can be highly disruptive because several seconds can be crucial. In the simulated slow response scenario, when a user opens two browser windows and tries to access `127.0.0.1/sleep` and `127.0.0.1` in the other window, the user must wait for requests to be processed sequentially due to the single-threaded nature.
+
+When a request to `/sleep` is processed, it illustrates how a website that needs to respond within a few seconds can cause delays when responding to other requests. Thus, the use of a single thread can consume time by potentially blocking the processing of other requests on the server.
