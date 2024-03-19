@@ -62,3 +62,58 @@ println!("Request: {:#?}", http_request);
 
 
 In this commit, there are several additions to the `handle_connection` function. The function is now not only capable of reading requests through a TCP stream but also able to respond to them. Its functionality is expanded by sending an HTTP response to the client containing the content of `hello.html`. This process is achieved by creating a response status line indicating that the request has been successfully processed with the code "200 OK". Then, the content of the `hello.html` file is read, and its length is calculated to be included in the response header. The complete HTTP response, including the status line, headers, and content, is then constructed and sent back to the client through the same stream. This illustrates how a basic web server can respond to HTTP requests by sending web page content to the client that sent the request.
+
+### Commit 3 Reflection Notes
+
+In the initial stage, the website responds to each client request by sending the same HTML content, `hello.html`, regardless of what the client requests. This means that no matter what path the client requests, the server always sends the same HTML.
+
+1. **Creating an Alternative HTML Content for Unavailable Paths**
+
+Initially, I created a `404.html` file to serve as alternative content if the requested path is not available on the server. The content of `404.html` is as follows:
+    ```html
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Hello!</title>
+    </head>
+    <body>
+        <h1>Oops!</h1>
+        <p>Sorry, I don't know what you're asking for.</p>
+        <p>Rust is running from ian's machine.</p>
+    </body>
+    </html>
+    ```
+
+2. **Modifying the `handle_connection` Function**
+In the `src\main.rs` file, there are changes made to the handle_connection function to handle responses. The function now looks like this:
+```rust
+fn handle_connection(mut stream: TcpStream) {
+    let buf_reader = BufReader::new(&mut stream);
+    let request_line = buf_reader.lines().next().unwrap().unwrap();
+
+    let (status_line, filename) = if request_line == "GET / HTTP/1.1" {
+        ("HTTP/1.1 200 OK", "hello.html")
+    } else {
+        ("HTTP/1.1 404 NOT FOUND", "404.html")
+    };
+
+    let contents = fs::read_to_string(filename).unwrap();
+    let length = contents.len();
+
+    let response =
+        format!("{status_line}\r\nContent-Length: {length}\r\n\r\n{contents}");
+
+    stream.write_all(response.as_bytes()).unwrap();
+}
+```
+In this refactored version:
+- **Duplication of Code Elimination**: The code block for reading files and sending responses was duplicated inside the if and else blocks. This inefficiency increases the risk of errors when changes are made.
+- **Improved Code Readability**: By separating the logic to determine the status line and file name from the logic to read files and send responses, the code becomes easier to read.
+- **Facilitation of Future Modifications**: If there is a need to change how the server reads files or sends responses, such changes only need to be made once. This greatly assists in code maintenance and the development of new features.
+- **Conditional Selection**: Based on the request line, a tuple is used to select the appropriate status line and filename. Then, the server reads the content of the relevant file and sends the response accordingly. This makes the code more modular and easier to manage.
+
+Refactoring in this manner enhances the efficiency, readability, and maintainability of the codebase.
+
+- Screenshot of Proof
+![Commit 3 screen capture](/assets/images/commit3failed.png)
